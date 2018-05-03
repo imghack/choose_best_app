@@ -22,34 +22,21 @@ def fetch_data(path):
     return data
 
 
-# all_apps_path = ''.join([PATH, 'apps.csv'])
-# data = fetch_data(all_apps_path)
+all_apps_path = ''.join([PATH, 'apps.csv'])
+data = fetch_data(all_apps_path)
+# show all and random and random 600 apps
+fig, ax = plt.subplots()
+ax.plot(data['Time'], data['Duration'], 'o')
+count = 600
+ax.plot(data['Time'][:count], data['Duration'][:count], 'o')
 
+# show all and random and random 600 apps
+fig, ax = plt.subplots()
+ax.plot(data['Time'], data['Revenue'], 'o')
+count = 600
+ax.plot(data['Time'][:count], data['Revenue'][:count], 'o')
 
-# fig, ax = plt.subplots()
-# ax.set_ylabel('duration')
-# ax.set_xlabel('hours')
-# ax.plot(data['Time'], data['Duration'], 'o')
-#
-# count = 600
-# ax.plot(data['Time'][:count], data['Duration'][:count], 'o')
-# ax.set_title('Duration when people are using apps')
-#
-# fig1, ax1 = plt.subplots()
-# ax1.set_ylabel('revenue')
-# ax1.set_xlabel('hours')
-# ax1.plot(data['Time'], data['Revenue'], 'o')
-#
-# count = 600
-# ax1.plot(data['Time'][:count], data['Revenue'][:count], 'o')
-# ax1.set_title('Revenue')
-
-# fig, ax = plt.subplots()
-# ax.set_ylabel('duration')
-# ax.set_xlabel('hours')
-#
-#
-
+# show apps by app name
 fig, ax = plt.subplots()
 files = os.listdir(APPS_PATH)
 for file in files:
