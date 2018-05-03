@@ -1,5 +1,7 @@
+import os
 import csv
 import dateutil.parser
+import shutil
 from utils.time_utils import append_time_duration
 
 READ_ROOT_FOLDER = '../../data/raw/'
@@ -35,6 +37,35 @@ def write(apps):
     with file:
         writer = csv.writer(file)
         writer.writerows(apps)
+
+
+def write_files_by_app_name(apps):
+    reset_apps_folder()
+    app_names = []
+    for app in apps[1:]:
+        app_name = app[0].split(".")[2]
+        path = "".join([WRITE_ROOT_FOLDER, "apps/", app_name, ".csv"])
+
+        if app_name not in app_names:
+            app_names.append(app_name)
+            write_row(path, apps[0])
+        write_row(path, app)
+
+
+# TODO : helper
+def write_row(path, row):
+    file = open(path, 'a')
+    with file:
+        writer = csv.writer(file)
+        writer.writerow(row)
+
+
+# TODO : helper
+def reset_apps_folder():
+    apps_path = "".join([WRITE_ROOT_FOLDER, "apps/"])
+    if os.path.exists(apps_path):
+        shutil.rmtree(apps_path)
+    os.mkdir(apps_path)
 
 
 def append_revenue(apps, link_data, orders):
@@ -77,5 +108,5 @@ if __name__ == '__main__':
     print('added Time duration')
     append_revenue(apps, link_data, orders)
     print('added revenue')
-
     write(apps)
+    write_files_by_app_name(apps)
