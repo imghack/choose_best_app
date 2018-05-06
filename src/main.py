@@ -18,19 +18,19 @@ def prepare_data():
 
 
 def show_graphs():
-    visualize.show_apps_by_property('Duration', 1)
-    visualize.show_apps_by_property('Revenue', 1)
-    visualize.show_apps_by_property('Duration', 1 / 50)
-    visualize.show_apps_by_property('Revenue', 1 / 50)
-    visualize.show_apps_difference_by_properties('Revenue', 'Duration', 1)
-    visualize.show_apps_max_revenue()
+    # visualize.show_apps_by_property('Duration', 1)
+    # visualize.show_apps_by_property('Revenue', 1)
+    # visualize.show_apps_by_property('Duration', 1 / 50)
+    # visualize.show_apps_by_property('Revenue', 1 / 50)
+    # visualize.show_apps_difference_by_properties('Revenue', 'Duration', 1)
+    visualize.show_apps_sum_revenue()
 
 
 def show_best_apps(count):
-    pass
+    visualize.show_apps_sum_revenue(count=count)
 
 
 if __name__ == '__main__':
-    prepare_data()
+    # prepare_data()
     show_graphs()
     show_best_apps(3)
