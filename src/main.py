@@ -21,7 +21,7 @@ def prepare_data():
 
 def show_best_apps(count):
     for weekday in range(0, 7):
-        visualize.show_apps_sum_revenue(count=count, weekday=weekday)
+        visualize.show_apps_sum_revenue(count=count, weekday=weekday, time_range=[9, 22])
 
 
 if __name__ == '__main__':

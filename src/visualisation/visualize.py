@@ -5,37 +5,45 @@ from settings import PROCESSED_PATH, PROCESSED_APPS_PATH, REPORTS_PATH
 from utils import file_utils
 
 
-def show_apps_sum_revenue(count=3, weekday=0):
-    apps = get_best_apps(count, weekday)
+def show_apps_sum_revenue(count=3, weekday=0, time_range=[0, 23]):
+    apps = get_best_apps(count, weekday, time_range)
     fig, ax = plt.subplots()
+    day_name = calendar.day_name[weekday]
 
     for app in apps:
         ax.plot(app['hours'], app['values'], 'o', label=app['name'])
-        ax.legend()
 
-    day_name = calendar.day_name[weekday]
+    sum_revenue = int(sum([sum(app['values']) for app in apps]))
+    ax.set_title(''.join([
+        day_name, ', from ', str(time_range[0]), ':00 to ', str(time_range[1]),
+        ':00 count-', str(count),
+        ', sum revenue =', str(sum_revenue)
+    ]))
+    ax.legend()
+
     plt.savefig(''.join([REPORTS_PATH, str(weekday), ' ', day_name, ' ', 'count-', str(count), '.png']))
     plt.show()
     return apps
 
 
-def get_best_apps(count, weekday):
+def get_best_apps(count, weekday, time_range):
     apps = get_apps_sum_revenue(weekday)
 
     best_apps = {}
     for app in apps:
         for index, hour in enumerate(app['hours']):
-            val = app['values'][index]
-            if not hour in best_apps:
-                best_apps[hour] = []
+            if time_range[0] <= hour and hour <= time_range[1]:
+                val = app['values'][index]
+                if not hour in best_apps:
+                    best_apps[hour] = []
 
-            if len(best_apps[hour]) < count:
-                best_apps[hour].append({'val': val, 'name': app['name']})
-            else:
-                best_apps[hour].append({'val': val, 'name': app['name']})
-                min_revenue_app = min(best_apps[hour], key=lambda x: x['val'])
+                if len(best_apps[hour]) < count:
+                    best_apps[hour].append({'val': val, 'name': app['name']})
+                else:
+                    best_apps[hour].append({'val': val, 'name': app['name']})
+                    min_revenue_app = min(best_apps[hour], key=lambda x: x['val'])
 
-                best_apps[hour].remove(min_revenue_app)
+                    best_apps[hour].remove(min_revenue_app)
 
     plot_data = {}
     for key in best_apps.keys():
