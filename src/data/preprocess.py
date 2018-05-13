@@ -54,3 +54,12 @@ def append_time_in_hours(apps, start_time_index=0):
         app.append(str(round(date_start.hour, 2)))
 
     return apps
+
+def append_time_in_days(apps, start_time_index=0):
+    apps[0].append('Weekday')
+
+    for app in apps[1:]:
+        date_start = dateutil.parser.parse(app[start_time_index])
+        app.append(str(date_start.weekday()))
+
+    return apps

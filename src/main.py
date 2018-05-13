@@ -12,25 +12,18 @@ def prepare_data():
     print('added revenue')
     preprocess.append_time_in_hours(apps, start_time_index=1)
     print('added Time in hours')
+    preprocess.append_time_in_days(apps, start_time_index=1)
+    print('added Time in days')
     file_utils.write(apps)
     file_utils.write_files_by_app_name(apps)
     print('finished data preprocessing!')
 
 
-def show_graphs():
-    # visualize.show_apps_by_property('Duration', 1)
-    # visualize.show_apps_by_property('Revenue', 1)
-    # visualize.show_apps_by_property('Duration', 1 / 50)
-    # visualize.show_apps_by_property('Revenue', 1 / 50)
-    # visualize.show_apps_difference_by_properties('Revenue', 'Duration', 1)
-    visualize.show_apps_sum_revenue()
-
-
 def show_best_apps(count):
-    visualize.show_apps_sum_revenue(count=count)
+    for weekday in range(0, 7):
+        visualize.show_apps_sum_revenue(count=count, weekday=weekday)
 
 
 if __name__ == '__main__':
     # prepare_data()
-    show_graphs()
     show_best_apps(3)

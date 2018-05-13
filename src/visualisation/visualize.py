@@ -1,92 +1,26 @@
 import os
 import matplotlib.pyplot as plt
+import calendar
 from settings import PROCESSED_PATH, PROCESSED_APPS_PATH, REPORTS_PATH
 from utils import file_utils
 
-def show_apps_by_property(property, decrease_multiplayer):
-    fig, ax = plt.subplots()
-    files = os.listdir(PROCESSED_APPS_PATH)
 
-    for file in files:
-        app_path = ''.join([PROCESSED_APPS_PATH, file])
-        data = file_utils.fetch_data(app_path)
-        size = int(len(data['Time']) * decrease_multiplayer)
-        ax.plot(data['Time'][:size], data[property][:size], 'o', label=file)
-        ax.legend()
-
-
-def show_apps_difference_by_properties(property1, property2, decrease_multiplayer):
-    fig, ax = plt.subplots()
-    files = os.listdir(PROCESSED_APPS_PATH)
-
-    for file in files:
-        app_path = ''.join([PROCESSED_APPS_PATH, file])
-        data = file_utils.fetch_data(app_path)
-        size = int(len(data['Time']) * decrease_multiplayer)
-        delta = [
-            data[property1][index] / (data[property2][index] or 0.01)
-            for index, el in enumerate(data[property1])
-        ]
-        ax.plot(data['Time'][:size], delta[:size], 'o', label=file)
-        ax.legend()
-
-
-def show_apps_sum_revenue(count=None):
-    if count:
-        apps = get_best_apps(count)
-    else:
-        apps = get_apps_sum_revenue()
-
+def show_apps_sum_revenue(count=3, weekday=0):
+    apps = get_best_apps(count, weekday)
     fig, ax = plt.subplots()
 
     for app in apps:
         ax.plot(app['hours'], app['values'], 'o', label=app['name'])
         ax.legend()
 
-    plt.savefig(''.join([REPORTS_PATH, str(count), '.png']))
+    day_name = calendar.day_name[weekday]
+    plt.savefig(''.join([REPORTS_PATH, str(weekday), ' ', day_name, ' ', 'count-', str(count), '.png']))
     plt.show()
     return apps
 
 
-def get_apps_sum_revenue():
-    files = os.listdir(PROCESSED_APPS_PATH)
-    property1 = 'Revenue'
-    property2 = 'Duration'
-    apps = []
-
-    for file in files:
-        sumDelta = {}
-        plot_data = {
-            'hours': [],
-            'values': []
-        }
-
-        app_path = ''.join([PROCESSED_APPS_PATH, file])
-        data = file_utils.fetch_data(app_path)
-
-        # delta = [
-        #     data[property1][index] / (data[property2][index] or 0.01)
-        #     for index, el in enumerate(data[property1])
-        # ]
-
-        for index, el in enumerate(data[property1]):
-            hour = int(data['Hours'][index])
-            revenue = data[property1][index]
-            if not hour in sumDelta:
-                sumDelta[hour] = 0
-            sumDelta[hour] += revenue
-
-        for hour in sorted(sumDelta):
-            plot_data['hours'].append(hour)
-            plot_data['values'].append(sumDelta[hour])
-
-        apps.append({'hours': plot_data['hours'], 'values': plot_data['values'], 'name': file})
-
-    return apps
-
-
-def get_best_apps(count):
-    apps = get_apps_sum_revenue()
+def get_best_apps(count, weekday):
+    apps = get_apps_sum_revenue(weekday)
 
     best_apps = {}
     for app in apps:
@@ -113,53 +47,51 @@ def get_best_apps(count):
 
     return [plot_data[key] for key in plot_data.keys()]
 
-# def show_apps_medium_revenue_per_hour():
-#     fig, ax = plt.subplots()
-#     files = os.listdir(PROCESSED_APPS_PATH)
-#     property1 = 'Revenue'
-#     property2 = 'Duration'
-#     max_revenues = []
-#
-#     for file in files:
-#         sumDelta = {}
-#         plot_data = {
-#             'hours': [],
-#             'values': []
-#         }
-#
-#         app_path = ''.join([PROCESSED_APPS_PATH, file])
-#         data = file_utils.fetch_data(app_path)
-#
-#         delta = [
-#             data[property1][index] / (data[property2][index] or 0.01)
-#             for index, el in enumerate(data[property1])
-#         ]
-#
-#         for index, el in enumerate(data[property1]):
-#             hour = int(data['Hours'][index])
-#             # revenue = data[property1][index]
-#             if not hour in sumDelta:
-#                 sumDelta[hour] = 0
-#             sumDelta[hour] += delta[index]
-#
-#         for hour in sorted(sumDelta):
-#             plot_data['hours'].append(hour)
-#             plot_data['values'].append(sumDelta[hour])
-#
-#         ax.plot(plot_data['hours'], plot_data['values'], 'o', label=file)
-#         ax.legend()
-#
-#     plt.show()
 
-# if __name__ == '__main__':
-# all_apps_path = ''.join([PATH, 'apps.csv'])
-# data = fetch_data(all_apps_path)
+def get_apps_sum_revenue(weekday_index):
+    files = os.listdir(PROCESSED_APPS_PATH)
+    apps = []
 
-# show_data_by_property(data, 'Duration', 600)
-# show_data_by_property(data, 'Revenue', 600)
-# show_apps_by_property('Duration', 1)
-# show_apps_by_property('Revenue', 1)
-# show_apps_by_property('Duration', 1 / 200)
-# show_apps_by_property('Revenue', 1 / 200)
-# show_apps_difference_by_properties('Revenue', 'Duration', 1)
-# show_apps_max_revenue()
+    for file in files:
+        app_path = ''.join([PROCESSED_APPS_PATH, file])
+        data = file_utils.fetch_data(app_path)
+        weekdays_data = {}
+
+        # for weekday in range(0, 7):
+        for index, weekday in enumerate(data['Weekday']):
+            weekday = int(weekday)
+            if weekday not in weekdays_data:
+                weekdays_data[weekday] = {
+                    'Duration': [],
+                    'Revenue': [],
+                    'Hours': []
+                }
+            weekdays_data[weekday]['Duration'].append(data['Duration'][index])
+            weekdays_data[weekday]['Revenue'].append(data['Revenue'][index])
+            weekdays_data[weekday]['Hours'].append(data['Hours'][index])
+
+        apps.append(sum_revenue(weekdays_data[weekday_index], file))
+
+    return apps
+
+
+def sum_revenue(data, file_name):
+    revenue_key = 'Revenue'
+    sum_revenue = {}
+    plot_data = {
+        'hours': [],
+        'values': []
+    }
+
+    for index, el in enumerate(data[revenue_key]):
+        hour = int(data['Hours'][index])
+        revenue = data[revenue_key][index]
+        if not hour in sum_revenue:
+            sum_revenue[hour] = 0
+        sum_revenue[hour] += revenue
+
+    for hour in sorted(sum_revenue):
+        plot_data['hours'].append(hour)
+        plot_data['values'].append(sum_revenue[hour])
+
+    return {'hours': plot_data['hours'], 'values': plot_data['values'], 'name': file_name}
