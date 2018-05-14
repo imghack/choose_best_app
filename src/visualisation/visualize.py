@@ -15,10 +15,10 @@ def show_apps_sum_revenue(count=3, weekday=0, time_range=(0, 23)):
 
     sum_revenue = int(sum([sum(app['revenue']) for app in apps]))
     ax.set_title(''.join([
-        'best revenue per min',
+        'mean revenue per min',
         day_name, ', from ', str(time_range[0]), ':00 to ', str(time_range[1]),
         ':00 count-', str(count),
-        ', sum =', str(sum_revenue)
+        ', old sum =', str(sum_revenue)
     ]))
     ax.legend()
 
@@ -102,9 +102,12 @@ def sum_revenue(data, file_name):
         revenue = data['Revenue'][index]
         if not hour in sum_full_revenue:
             sum_full_revenue[hour] = 0
-            sum_revenue_per_min[hour] = 0
+            sum_revenue_per_min[hour] = []
         sum_full_revenue[hour] += revenue
-        sum_revenue_per_min[hour] += revenue / (duration or 1)
+        sum_revenue_per_min[hour].append(revenue / (duration or 1))
+
+    for hour in sum_revenue_per_min:
+        sum_revenue_per_min[hour] = mean(sum_revenue_per_min[hour])
 
     for hour in sum_full_revenue:
         plot_data['hours'].append(hour)
@@ -117,3 +120,7 @@ def sum_revenue(data, file_name):
         'revenue_per_min': plot_data['revenue_per_min'],
         'name': file_name
     }
+
+
+def mean(numbers):
+    return float(sum(numbers)) / max(len(numbers), 1)
